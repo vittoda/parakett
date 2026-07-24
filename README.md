@@ -1,7 +1,7 @@
 ## Run the server.
 ### Setup
-- **Build the required MCP servers**. Follow the corresponding instructions in [flowstack_mcp](https://github.com/vittoda/flowstack_mcp) repo for the instructions.
-- **Configure MCP servers in FlowStack server**. To use MCP servers, in FlowStack server, you need to define them a config file. Format is simple. There are two config files provided out of the box.
+- **Build the required MCP servers**. Follow the corresponding instructions in [parakett_mcp](https://github.com/vittoda/parakett_mcp) repo for the instructions.
+- **Configure MCP servers in Parakett server**. To use MCP servers, in Parakett server, you need to define them a config file. Format is simple. There are two config files provided out of the box.
 	- `mcpServers.json`, which contains all the available MCP servers in mcp repo. Some of the servers defined in this file will need API keys. Check the documentation for the MCP server for more details
 	- `mcpServersBasic.json`, which has subset of the MCP servers that will not need any API keys. 
 	
@@ -14,8 +14,8 @@
 	Go through the agent configuration document, for more details
 	
 - **Update the ~/.fskeys** file with keys for **Gemini** or **github Model** API keys. The file is a simple *key=value* format.
-	- For Gemini, use `flowstack.gemini` as the key
-	- For github Model API key use `flowstack.github.openai` as the key
+	- For Gemini, use `parakett.gemini` as the key
+	- For github Model API key use `parakett.github.openai` as the key
 - **Update keys for channels**. Some of the channel implementation uses API key. Channel implementation are added as build dependencies. As of now slack is one one of the event channel. You can follow the instruction in respective documentation to get the keys, or remove the dependency from `build.gradle` file. If not you can always ignore the error, during server startup.
 
 ### Start the server
@@ -23,7 +23,7 @@ To start the server for development and testing, use the following command. Plea
 
 `./gradlew clean build bootRun`
 
-You will need [FlowStack UI](https://github.com/vittoda/flowstack_ui) to channels to trigger any action. Check the documentation on how to run the UI instance. 
+You will need [Parakett UI](https://github.com/vittoda/parakett_ui) to channels to trigger any action. Check the documentation on how to run the UI instance. 
 
-[Main Documentation](https://vittoda.github.io/flowstack/)
+[Main Documentation](https://vittoda.github.io/parakett/)
 

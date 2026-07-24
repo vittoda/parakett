@@ -1,10 +1,10 @@
 # Local Key Manager
-To make development and local testing easier, we have an implementation to access the access token or other credentials from a local store. `.fskeys` file on your home directory has all the keys. These keys can be used by FlowStack Server, MCP Servers and Channels. This is a simple key value pair file. 
+To make development and local testing easier, we have an implementation to access the access token or other credentials from a local store. `.fskeys` file on your home directory has all the keys. These keys can be used by Parakett Server, MCP Servers and Channels. This is a simple key value pair file. 
 
 Here is a sample file.
 
 ```
-flowstack.gemini=AQ.Abcdefghijkl-mnopqrst
+parakett.gemini=AQ.Abcdefghijkl-mnopqrst
 slack.config={"webhookURL":"https://hooks.slack.com/services/ABCDEFGHIJKL/AAAABBBCCC/abcdefghijklmno"}
 ```
 

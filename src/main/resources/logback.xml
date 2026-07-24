@@ -6,7 +6,7 @@
     </appender>
 
 
-    <logger name="com.flowstack" level="INFO" />
+    <logger name="com.parakett" level="INFO" />
 
     <root level="WARN">
         <appender-ref ref="CONSOLE" />

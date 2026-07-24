@@ -1,6 +1,6 @@
 # Approval workflow
 
-This example will demonstrate following capabilities of FlowStack server.
+This example will demonstrate following capabilities of Parakett server.
 
 1. Work with multiple MCP servers
 2. Multiple workflow in the same agent
@@ -20,8 +20,8 @@ Following MCP servers are used
 * Google Calender
 
 ## Instructions
-1. Ensure that the MCP servers, channels, FlowStack server and FlowStack UI are built. Follow the instructions in the respective README.md for the same
-2. Ensure you have credentials for Gmail, Google Calender generated and placed appropriately. Follow the instructions in the [documentation](https://vittoda.github.io/flowstack/creds/) for credentials and configuration 
+1. Ensure that the MCP servers, channels, Parakett server and Parakett UI are built. Follow the instructions in the respective README.md for the same
+2. Ensure you have credentials for Gmail, Google Calender generated and placed appropriately. Follow the instructions in the [documentation](https://vittoda.github.io/parakett/creds/) for credentials and configuration 
 3. Update the approvals.md. This file is the domain context for approval life cycle. It is created in markdown format. In this file make the following changes
     1. Replace `<senderEmail>` with your email id  (Do not remove the back-quote). Your Gmail credentials should have permissions to send email on belaf of this email id
     2. Replace `<approverEmail>`, with approver email (Do not remove the back-quote). They should be differrent, otherwise the event will be triggered incorrectly.
@@ -32,14 +32,14 @@ Following MCP servers are used
        -Dfs.agentsConfigFile=mexamples/approvals/agents.json \
        -Dfs.channelsConfigFile=mexamples/approvals/channelsConfig.json \
        -Dmcp.base=<mcp_server_folder> \
-       -jar build/libs/flow_stack-0.0.1.jar
+       -jar build/libs/parakett-0.0.1.jar
     ```
 
-5. Start the FlowStack UI.
+5. Start the Parakett UI.
 
     ```npm run dev```
 
-6. Enter the following prompt in the web CLI interface in FlowStack UI , after connecting to server.
+6. Enter the following prompt in the web CLI interface in Parakett UI , after connecting to server.
 
     ```
     agent run approvalsAgent --log --archive   I need to setup a team dinner event on 30th July 2026, at 8:30 PM, location: Gatsby Cocktails & Cuisines, Bannerghatta Road, Bangalore , Karnataka, India. Get the required approvals

@@ -14,13 +14,13 @@ In this example, we will trigger an asynchronous workflow that pauses for user i
 
 This example will use SQLLite MCP server. Agent is simple. We will just create a table and expect the agent to get human in loop approval. See the last line in sqliteContext.txt
 
-1. Ensure you build SQLite MCP server, FlowStack Server and FlowStack UI
+1. Ensure you build SQLite MCP server, Parakett Server and Parakett UI
 2. See the configuration in agents.json. We need a webhook. For this purpose, we will use a simple python script, listening on port 8090. All it does is dump the request it received. Check the `dump.py` in this folder. We need to run it.
 
     ```
     python3 ./dump.py
     ```
-3. Start FlowStack server. Run the following command from your `flowstack` repository root folder. Replace `mcp_server_folder` witho your MCP server repo root folder.
+3. Start Parakett server. Run the following command from your `parakett` repository root folder. Replace `mcp_server_folder` witho your MCP server repo root folder.
 
     ```
    java -Dfs.mcpConfigFile=./examples/human_in_loop/mcpServers.json \
@@ -28,9 +28,9 @@ This example will use SQLLite MCP server. Agent is simple. We will just create a
         -Dfs.channelsConfigFile=./examples/human_in_loop/channelsConfig.json \
         -Dmcp.base=<mcp_server_folder> \
         -DopenAI.model.logRequests=true \
-        -jar build/libs/flow_stack-0.0.1.jar
+        -jar build/libs/parakett-0.0.1.jar
     ```
-4. Start the FlowStack UI
+4. Start the Parakett UI
     ```
     npm run dev
     ```
@@ -81,7 +81,7 @@ This usecase will be similar follow. Instead of webhook we will use **event** mo
     }
     ```
 
-2. Start the FlowStack server
+2. Start the Parakett server
 
     ```
    java -Dfs.mcpConfigFile=./examples/human_in_loop/mcpServers.json \
@@ -89,7 +89,7 @@ This usecase will be similar follow. Instead of webhook we will use **event** mo
         -Dfs.channelsConfigFile=./examples/human_in_loop/channelsConfig.json \
         -Dmcp.base=<mcp_server_folder> \
         -DopenAI.model.logRequests=true \
-        -jar build/libs/flow_stack-0.0.1.jar
+        -jar build/libs/parakett-0.0.1.jar
     ```
 
 3. In the web CLI, enter the following prompt. 

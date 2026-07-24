@@ -6,8 +6,8 @@ As an example, we’ll look at a use case where an agent prompts the LLM to send
 
 # Instructions
 
-1. Ensure you have build GMail and SQlite MCP servers, FlowStack Server
-2. Ensure you have setup the appropriate credentials for Gmail channel. Refer the [instructions](https://vittoda.github.io/flowstack/creds/) for an example.
+1. Ensure you have build GMail and SQlite MCP servers, Parakett Server
+2. Ensure you have setup the appropriate credentials for Gmail channel. Refer the [instructions](https://vittoda.github.io/parakett/creds/) for an example.
 3. Setup SQLite DB. Use any DB tool (like [sqlectron](https://sqlectron.github.io/) ) and following the instruction below to setup our customer DB
     1. Create a DB `variables_example`. You need to create it in `/tmp` folder, as the MCP configuration use this folder. Change it appropriately if you are using something else.
     2. Create two tables   `customers` and `orders` using the following DDLs
@@ -54,7 +54,7 @@ As an example, we’ll look at a use case where an agent prompts the LLM to send
         -Dfs.channelsConfigFile=./examples/variables/channelsConfig.json \
         -Dmcp.base=<mcp_server_folder> \
         -DopenAI.model.logRequests=true \
-        -jar build/libs/flow_stack-0.0.1.jar
+        -jar build/libs/parakett-0.0.1.jar
     ```
 
 5. Use curl command to send the prompt. Please note the variables.

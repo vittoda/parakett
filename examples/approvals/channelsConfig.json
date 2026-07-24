@@ -8,7 +8,7 @@
                 "clientCredsKey": "google.gmail.clientCreds",
                 "filter" : {
                     "subject" : {
-                        "contains" : "FlowStack Request"
+                        "contains" : "Parakett Request"
                     }
                 }
             }

@@ -1,17 +1,17 @@
-site_name: Flowstack Documentation
+site_name: Parakett Documentation
 site_description: An open-source Java-based AI agent orchestration framework.
-site_url: https://vittoda.github.io/flowstack/
+site_url: https://vittoda.github.io/parakett/
 
 plugins:
   - search
   - macros
 
 extra:
-  flowstack_server_binary: "flow_stack-0.0.1.jar"
+  parakett_server_binary: "parakett-0.0.1.jar"
 
 theme:
   name: material
-  logo: assets/flow_stack.svg
+  logo: assets/parakett.svg
   favicon: assets/favicon.svg
 
   font:

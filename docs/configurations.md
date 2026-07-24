@@ -1,10 +1,10 @@
-# FlowStack Configurations
+# Parakett Configurations
 
-This document covers configurations for FlowStack server. Schema in the following sections will use `Typescript` format to define the type.
+This document covers configurations for Parakett server. Schema in the following sections will use `Typescript` format to define the type.
 
 ## MCP Server configuration.
 
-MCP servers configuration file defines list of MCP servers available for the FlowStack instance. Here is the structure of configuration file
+MCP servers configuration file defines list of MCP servers available for the Parakett instance. Here is the structure of configuration file
 
 ```
 {
@@ -32,7 +32,7 @@ Each of the MCP server definition follows the following structure
 | :--- | :---: | :---: | :--- |
 | `name` | String | Yes | A unique identifier for the server. Agents will use this value to identify the MCP server it needs to use |
 | `category` | String | Yes | The functional classification. At the moment used for UI rendering. Supported values are `DB`, `System` and `Saas` |
-| `command` | String | Yes | Command that will be executed by the FlowStack server to start the MCP server. You can use system property `mcp.base`, as part of the command|
+| `command` | String | Yes | Command that will be executed by the Parakett server to start the MCP server. You can use system property `mcp.base`, as part of the command|
 | `connection` | Object | Yes | At the moment only *stdio* mode is available for MCP servers. So, the *type* attribute will have `stdio` as the value
 
 Here is a sample for SQLite MCP server
@@ -78,7 +78,7 @@ Each of the agent definition has the following schema
 | Field Name | Type | Mandatory | Description |
 | :--- | :---: | :---: | :--- |
 | `name` | String | Yes | A unique display name for the Agent. |
-| `id` | String | Yes | Unique identifier for the agent. Within FlowStack or for multi-agent configuration, this will be the identifier used. Reccomended characeters are A-Z,a-z,0-9,_. |
+| `id` | String | Yes | Unique identifier for the agent. Within Parakett or for multi-agent configuration, this will be the identifier used. Reccomended characeters are A-Z,a-z,0-9,_. |
 | `description` | String | Yes | A free form text describing the agent. This information will be used by other agents to determine high level capabilities of this agent. |
 | `context` | Object | Yes | Domain context for the agent, which provides system context for the LLM for this agent. Value can be a context. If the context is too large, save it in a file and specify the `file` attribute for context. |
 | `mcpServers` | String[] | Yes | An array of MCP server identifiers that this agent will use. |
@@ -303,7 +303,7 @@ Here is an example channel configuration file which uses *Slack* and *Gmail* cha
                 "clientCredsKey": "google.gmail.clientCreds",
                 "filter" : {
                     "subject" : {
-                        "contains" : "FlowStack Request"
+                        "contains" : "Parakett Request"
                     }
                 }
             }

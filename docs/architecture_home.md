@@ -1,1 +1,1 @@
-# FlowStack Architecture
+# Parakett Architecture

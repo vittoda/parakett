@@ -18,10 +18,10 @@ Following instructions are common for Gmail, Google Calender and Google Drive. W
     2. Ensure API is *Gmail API*.
     3. Select **User Data** for type
     5. Click **Save And Continue***
-    6. In the OAuth consent screen, select a name for an app. For example *FlowStack*
+    6. In the OAuth consent screen, select a name for an app. For example *Parakett*
     7. In **User support email** enter your email address. You can enter the same for **Developer contact information**
     8. You can leave the scope for now. Click **Save and Continue**
-    9. In **OAuth Client ID**, select *Desktop app* as **Application type* and a name for the client. Say *Flowstack Client*
+    9. In **OAuth Client ID**, select *Desktop app* as **Application type* and a name for the client. Say *Parakett Client*
     10. Click **Create*
     12. In the next click click Download button to download the credentials file to a safe location.
 5. Add email for your test app. We are not publising the app we have created above (as this is only for testing. If you chose you can do so.) So, we need add test users. Otherwise the following steps will fail.
@@ -62,15 +62,15 @@ Following instructions are common for Gmail, Google Calender and Google Drive. W
 We are using slack as MCP server and input as a channel. So, we need to following various steps mentioned below to get the credentials, create an app. In the following set of instructions, we will assume that you don't have slack workspace yet and starting from a fresh account. If you already have one, skip the steps accordingly
 
 1. Login to [slack](https://slack.com/signin#/signin)
-2. Create a workspace when prompted to. Say `FlowStack`.
-3. Go ahead and create a new slack channel. Same it ias `FlowStack` or whatever you prefer.
+2. Create a workspace when prompted to. Say `Parakett`.
+3. Go ahead and create a new slack channel. Same it ias `Parakett` or whatever you prefer.
 
 ### Create webhook URL
 Webhook URL is needed by slack MCP server 
 
 1. Goto [https://api.slack.com/apps](https://api.slack.com/apps)
 2. Click **Create an App**. Select **From Scratch** option
-3. Let us name the app as `FlowStack` as well. Select the channel you created in the above step.
+3. Let us name the app as `Parakett` as well. Select the channel you created in the above step.
 4. Click **Create App** button. (Follow the terms and conditions.)
 5. Once the app is created, on the left navigation panel click **Incoming Webhooks** under **Features** tab.
 6. Toggle the **Activate Incoming Webhooks**
@@ -109,7 +109,7 @@ We will need Bot token and App token to read messages from MCP server or channel
     1. Goto the channel settings
     2. Click **Agent & Apps** tab
     3. Click **Add Agent & Apps**. 
-    4. Select the FlowStack app and add it.
+    4. Select the Parakett app and add it.
 17. In `~/.fskeys`, ass a key `slack.channel.config` with value as `{appToken:'App token', botToken:' Bot auth token'}`.
 
 

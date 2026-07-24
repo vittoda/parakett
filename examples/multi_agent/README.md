@@ -1,8 +1,8 @@
 # Multi agent orchestration. 
 
-**Multi-agent orchestration** is one of the core capability in FlowStack, enabling one agent to trigger another based on the capabilities it exposes.
+**Multi-agent orchestration** is one of the core capability in Parakett, enabling one agent to trigger another based on the capabilities it exposes.
 
-Rather than building a single monolithic agent with every feature built-in, you can design specialized micro-agents that coordinate with one another to achieve a goal. Note that "micro-agent" is purely a conceptual pattern. FlowStack manages them as standard agents and doesn't need native awareness of the term to orchestrate them seamlessly.
+Rather than building a single monolithic agent with every feature built-in, you can design specialized micro-agents that coordinate with one another to achieve a goal. Note that "micro-agent" is purely a conceptual pattern. Parakett manages them as standard agents and doesn't need native awareness of the term to orchestrate them seamlessly.
 
 In this example we will cover the following agents
 - **Event orchestrator** : The agent will recieve events. It won't have any other knowledge. So, it will delegate some of the work to other agents.
@@ -13,7 +13,7 @@ We will use a scenario where we need to get the OS version (using *Shell* agent)
 
 ## Instructions
 
-1. Build FlowStack Server, FlowStack UI, Shell and SQLite agents.
+1. Build Parakett Server, Parakett UI, Shell and SQLite agents.
 2. Create a db in SQLite with name ma_example and table `os_versions`, using the following DDL.
 
     ```
@@ -21,7 +21,7 @@ We will use a scenario where we need to get the OS version (using *Shell* agent)
         os_version VARCHAR(100)
     );
     ```
-3. Start FlowStack Server.  Replace `mcp_server_folder` witho your MCP server repo root folder. 
+3. Start Parakett Server.  Replace `mcp_server_folder` witho your MCP server repo root folder. 
     ```
     java \
         -Dfs.channelsConfigFile=./examples/multi_agent/channelsConfig.json \
@@ -29,9 +29,9 @@ We will use a scenario where we need to get the OS version (using *Shell* agent)
 	    -Dfs.mcpConfigFile=./examples/multi_agent/mcpServers.json \
 	    -Dfs.agentsConfigFile=./examples/multi_agent/agents.json \
         -DopenAI.model.logRequests=true \
-        -jar build/libs/flow_stack-0.0.1.jar
+        -jar build/libs/parakett-0.0.1.jar
     ```
-4. Start FlowStack UI. Run the following command from flowstack_ui repo folder
+4. Start Parakett UI. Run the following command from parakett_ui repo folder
     ```
     npm run dev
     ```

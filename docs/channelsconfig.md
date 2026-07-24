@@ -24,5 +24,5 @@ This configuration defines channel instance configuration. For example, your age
 | :--- | :---: | :---: | :--- |
 | `name` | String | Yes | A unique identifier for the server. Agents will use this value to identify the MCP server it needs to use |
 | `category` | String | Yes | The functional classification. At the moment used for UI rendering. Supported values are `DB`, `System` and `Saas` |
-| `command` | String | Yes | Command that will be executed by the FlowStack server to start the MCP server. You can use system property `mcp.base`, as part of the command|
+| `command` | String | Yes | Command that will be executed by the Parakett server to start the MCP server. You can use system property `mcp.base`, as part of the command|
 | `connection` | Object | Yes | At the moment only *stdio* mode is available for MCP servers. So, the *type* attribute will have `stdio` as the value
