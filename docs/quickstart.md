@@ -40,7 +40,7 @@ cd flowstack
 java -Dfs.mcpConfigFile=mcpServersBasic.json \
      -Dfs.agentsConfigFile=agentsBasic.json \
      -Dmcp.base=<path_to_flowstack_mcp_folder> \
-     -jar build/libs/flow_stack-0.0.1.jar
+     -jar build/libs/{{ flowstack_server_binary }}
 ```
 
 Make sure you replace *path_to_flowstack_mcp_folder* with actual path to flowstack_mcp folder. This will be relative path for MCP Server binaries defined in `mcpServersBasic.json`
