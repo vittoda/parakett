@@ -7,15 +7,19 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.parakett.JsonUtils;
 import com.parakett.Keys;
 import com.parakett.flow.FlowMemory;
@@ -32,7 +36,7 @@ public class OpenAI extends ModelConnection {
 
     private static HttpClient _mClient = null;
 
-    private static final int THROTTLE_ERROR_RETRY_COUNT = 0;
+    private static final int THROTTLE_ERROR_RETRY_COUNT = 2;
 
     private String _mModelName = null;
     private double _mTemperature = 0.2;
@@ -152,7 +156,9 @@ public class OpenAI extends ModelConnection {
             for (ToolMessage t : tools) {
                 ObjectNode function = JsonUtils.MAPPER.createObjectNode();
                 function.put("type", "function");
-                function.set("function", t.toolDefinition);
+                //LOGGER.info("Validating tool {}'", t.toolDefinition.toPrettyString());
+                JsonNode toolDef = getFixedToolCallForStrictMode(t.toolDefinition);
+                function.set("function", toolDef);
                 toolsArray.add(function);
             }
             request.set("tools", toolsArray);
@@ -205,6 +211,15 @@ public class OpenAI extends ModelConnection {
                 }
 
                 if (statusCode == 429 || statusCode == 503) {
+
+                    // ==================================================================================
+                    if (statusCode == 429) {
+                        LOGGER.warn("Error code '{}'. Body : {}", statusCode, httpResponse.body());
+                        httpResponse.headers().map().forEach(
+                                (name, values) -> LOGGER.warn("Header {}: {}", name, String.join(", ", values)));
+                    }
+                    // ==================================================================================
+
                     int retryCount = 0;
                     while (retryCount < THROTTLE_ERROR_RETRY_COUNT && (statusCode == 429 || statusCode == 503)) {
                         Thread.sleep(retryInterval);
@@ -294,13 +309,14 @@ public class OpenAI extends ModelConnection {
             ArrayNode tool_calls = (ArrayNode) message.get("tool_calls");
 
             // Push it to the memory.
-            memory.addContent(new ModelAssistantMessage(null, tool_calls));
+            memory.addContent(new ModelAssistantMessage(null, getCompressedToolCalls(tool_calls)));
 
             ModelToolResponse mc = new ModelToolResponse(message);
 
             for (int i = 0; i < tool_calls.size(); i++) {
                 JsonNode tool = tool_calls.get(i);
                 JsonNode function = tool.get("function");
+                LOGGER.info(function.toPrettyString());
                 String name = function.get("name").asText();
                 String id = tool.get("id").asText();
                 JsonNode argumentsNode = function.get("arguments");
@@ -397,6 +413,154 @@ public class OpenAI extends ModelConnection {
             LOGGER.warn("Not able to write the request file.", e);
             return null;
         }
+    }
+
+    private ArrayNode getCompressedToolCalls(ArrayNode tools) throws ModelException {
+        ArrayNode ret = JsonUtils.MAPPER.createArrayNode();
+        for (int i = 0; i < tools.size(); i++) {
+            JsonNode tool = tools.get(i).deepCopy(); // We clone, because we don't want to modify the priginal content
+
+            // Get to the arguments.
+            JsonNode function = tool.get("function");
+            JsonNode argumentsNode = function.get("arguments");
+            ((ObjectNode) function).set("arguments", compress(argumentsNode, 0));
+            ret.add(tool);
+        }
+
+        return ret;
+    }
+
+    private JsonNode compress(JsonNode node, int level) {
+        if (level >= 5) {
+            return NullNode.getInstance();
+        }
+
+        if (node.isObject()) {
+            Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+            ObjectNode on = (ObjectNode) node;
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> entry = fields.next();
+                String key = entry.getKey();
+                JsonNode value = entry.getValue();
+                value = compress(value, level + 1);
+                on.set(key, value);
+            }
+
+            return on;
+        } else if (node.isTextual()) {
+            String v = node.asText();
+            if (v.length() > 100) {
+                v = v.substring(0, 50) + "\n... [SYSTEM NOTE: " + v.length()
+                        + " chars suppressed post-execution. Payload processed successfully.] ...\n"
+                        + v.substring(v.length() - 50);
+                return TextNode.valueOf(v);
+            } else {
+                return node;
+            }
+        } else if (node.isArray()) {
+            ArrayNode array = (ArrayNode) node;
+            int size = array.size();
+
+            // Maxium 10 items.
+            if (size > 10) {
+                int elementsToRemove = size - 10;
+                while (elementsToRemove > 0 && array.size() > 0) {
+                    array.remove(array.size() - 1); // Remove the last element
+                    elementsToRemove--;
+                }
+            }
+
+            size = array.size();
+            for (int i = 0; i < size; i++) {
+                JsonNode item = array.get(i);
+                item = compress(item, level + 1);
+                array.set(i, item);
+            }
+            return array;
+        } else {
+            return node;
+        }
+
+    }
+
+    ObjectNode getFixedToolCallForStrictMode(JsonNode on) throws ModelException {
+       
+        ObjectNode tool = (ObjectNode) (on.deepCopy());
+        tool.put("strict", true);
+        getFixedObject((ObjectNode)(tool.get("parameters")));
+        return tool;
+    }
+
+    void getFixedObject(ObjectNode prop) throws ModelException {
+
+        ArrayNode required = null;
+        if (prop.has("required")) {
+            required = (ArrayNode) prop.get("required");
+        } else {
+            required = JsonUtils.MAPPER.createArrayNode();
+        }
+
+        // Find out what are the optional fields.
+        JsonNode properties = prop.get("properties");
+        Iterator<String> fieldNames = properties.fieldNames();
+        ArrayList<String> optionalFields = new ArrayList<>();
+        while (fieldNames.hasNext()) {
+            String key = fieldNames.next();
+            int sz = required.size();
+            boolean found = false;
+            for (int i = 0; i < sz; i++) {
+                String r = required.get(i).asText();
+                if (r.equals((key))) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                optionalFields.add(key);
+            }
+        }
+
+        fieldNames = properties.fieldNames();
+        ArrayNode allRequired = JsonUtils.MAPPER.createArrayNode();
+        while (fieldNames.hasNext()) {
+            String key = fieldNames.next();
+            ObjectNode p = (ObjectNode) properties.get(key);
+            String type = p.get("type").asText();
+            allRequired.add(key);
+
+            if (optionalFields.contains(key)) {
+                ArrayNode typeArray = JsonUtils.MAPPER.createArrayNode();
+                typeArray.add(type);
+                typeArray.add("null");
+                p.set("type", typeArray);
+            }
+
+            if (type.equals("object")) {
+                getFixedObject((ObjectNode) p.get("properties"));
+            } else if (type.equals("array")) {
+                JsonNode items = p.get("items");
+                if (items.get("type").asText().equals("object")) {
+                    getFixedObject((ObjectNode) items);
+                } else if (items.get("type").asText().equals("array")) {
+                    // We may have to consider nested type.
+                    String itype = items.get("type").asText();
+                    JsonNode nitems = items;
+                    while (itype.equals("array")) {
+                        nitems = items.get("items");
+                        itype = nitems.get("type").asText();
+                    }
+
+                    getFixedObject((ObjectNode) nitems);
+                }
+            }
+
+        }
+
+        //Add the required fields and additional 
+        prop.set("required", allRequired);
+        prop.put("additionalProperties", false);
+
     }
 
 }

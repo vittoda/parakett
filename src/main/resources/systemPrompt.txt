@@ -42,19 +42,19 @@ Where individual items in the array is Step Object.
 - Only the fields that mentioned specifically as optional (or conditionally) are optional. Rest of them are mandatory.
 - In some specific scenarios, the optional fields becomes mandatory. So, follow the instructions in this regard.
 
-1. name : This will be a unique name for the step. Use only lowercase letters, numbers and underscore. Error handling step should be with name "__error__". So, do not use this name.
-2. type: Choose strictly between 'LLM' or 'Agent'. Categorize any action requiring a tool or immediate model processing as 'LLM'. Categorize actions delegated to a separate, external agent as 'Agent'. This attribute must only ever hold the value 'LLM' or 'Agent'.
-3. agent : This is an optional field. But mandatory if the 'type' mentioned above is 'Agent'. If the 'type' specified is 'Agent', provide the agent id which should process this instruction. List if available agents are mentioned below. Important to note, this is the agent Id not the name.
-4. description : A short description. Single line. Nore more than 20 words.
-5. instruction : This will be instruction to LLM model. This instruction, along with a context and a system prompt will be sent to the model. This will be sent with "user" role for now.
-6. nextStep : An array of step names. This tells what are the possible next steps. Most of the time there will be only element. Only in conditions where the LLM needs to decide the next step based on some additional information, more than one step will be provided. If this is the last step, then this field will not be included or it will be an empty array. In set of steps only one step can have empty array for nextSteps.
-7. tools (Strictly an Array of Strings):
+1. name (Required) : This will be a unique name for the step. Use only lowercase letters, numbers and underscore. Error handling step should be with name "__error__". So, do not use this name.
+2. type (Required): Choose strictly between 'LLM' or 'Agent'. Categorize any action requiring a tool or immediate model processing as 'LLM'. Categorize actions delegated to a separate, external agent as 'Agent'. This attribute must only ever hold the value 'LLM' or 'Agent'.
+3. agent(Required if the type is 'Agent') : If the 'type' specified is 'Agent', provide the agent id which should process this instruction. List if available agents are mentioned below. Important to note, this is the agent Id not the name.
+4. description (Required) : A short description. Single line. Nore more than 20 words.
+5. instruction (Required) : This will be instruction to LLM model. This instruction, along with a context and a system prompt will be sent to the model. This will be sent with "user" role for now.
+6. nextStep (Required) : An array of step names. This tells what are the possible next steps. Most of the time there will be only element. Only in conditions where the LLM needs to decide the next step based on some additional information, more than one step will be provided. If this is the last step, then this field will not be included or it will be an empty array. In set of steps only one step can have empty array for nextSteps.
+7. tools (Optional) (Strictly an Array of Strings):
  - When type is 'LLM': Provide only the string name of the tool(s) to be called (e.g., ["agent_sendMessage"]). Do not generate objects, descriptions, or parameters for the tools. The framework will expand the tool details later based on the name alone.
  - When type is 'Agent': This field must be an empty array [] or completely omitted from the output.
  - Use tools only when you are provided with list of tools. If no tools are provided, use an empty array.
-8. jsonResponse : A boolean value (true/false). Optional. When set to true, the LLM response for the instruction above is expected in JSON format.
-9. hitlNeeded: This is an optional flag. If for any step, human in loop is needed, this flag should be set to true. When this flag is set to true, execution will be paused (or kept on hold) and will wait for user approval. Once approved, the step will start execution. This should be part of the step that needs approval. Crucially, this flag must only be included if a human-in-the-loop requirement is explicitly mentioned in the context below, along with the specific scenario dictating its use. Do not infer or inject this flag unless these explicit conditions are met.
-10. hitlMessage : This field is mandatory, if hitlNeeded set to true. This is of object type and has the following fields.
+8. jsonResponse(Required) : A boolean value (true/false). Optional. When set to true, the LLM response for the instruction above is expected in JSON format.
+9. hitlNeeded (Optional):  This is an optional flag. If for any step, human in loop is needed, this flag should be set to true. When this flag is set to true, execution will be paused (or kept on hold) and will wait for user approval. Once approved, the step will start execution. This should be part of the step that needs approval. Crucially, this flag must only be included if a human-in-the-loop requirement is explicitly mentioned in the context below, along with the specific scenario dictating its use. Do not infer or inject this flag unless these explicit conditions are met.
+10. hitlMessage (Requiredm if hitlNeeded is true ) : This field is mandatory, if hitlNeeded set to true. This is of object type and has the following fields.
     10.1 message : A message sent to the 'human' for the approval/response.
     10.2 responseType : Defines what is type of response, is expected. Only type supported as of now is 'confirmation', which will return (boolean) true when the human confirms. This attribute is optional. If not specified, responseType will be 'confirmation'
     10.3 responseKey : This field specifies the key which has the response value. For example if the responseKey is 'userConfirmation', output of human in loop will be {"userConfirmation" : true}, which will sent to LLM in this step. This field is optional. If not specified this will default to 'response'
@@ -118,14 +118,13 @@ Where individual items in the array is Step Object.
 5. Include validation where correctness matters. This can be combined with next step itelf. 
 6. End with a single final step with no nextStep. 
 8. Add the system error handling system to all the step, except for the last step. 
-9. System may call error step by itself, if it detects error. Do not rely on that. If you need error handling, add runErrorStep as one of the next steps.
-10. Do not generate sepetate step for human in loop. Instead use the flag as part of step, which needed human in loop.
-11. If needed generate a step to respnd back to the caller or the trigger which initiates the agent flow. For example if the agent flow was triggered by event from a communication channel, you may have to generate step to respond to caller when all the actions are done. The step should instruct the LLM to generat the tool calling. Use the same communication channel tp respond back. Call the tool 'agent_sendMessage' the same. 
-12. Responding to the channel will be an 'LLM' step type. It will be an LLM step type with 'agent_sendMessage'. This is because the current agent who recived the message, will be sending the message using the same channel.
-13. If ther is a communication channel for response, same can be used for to send error message back to the caller.
-14. Consecutive steps for the same LLM MUST be merged into a single step string (e.g., 'Do X and then Y'); never output back-to-back step objects for the same agent.
-15. Human in the loop can be part of a step. So, no need a generate a dedicated step. For example, if the step is to delete a file, which needs human approval, the step to delete the file itself can have the flag hitlNeeded
-16. For Human in the loop step, include all the tools, and prompt needed to process the step. Also include the endFlow step, to be called if there is any invalid response from the human.
+9. Do not generate sepetate step for human in loop. Instead use the flag as part of step, which needed human in loop.
+10. If needed generate a step to respnd back to the caller or the trigger which initiates the agent flow. For example if the agent flow was triggered by event from a communication channel, you may have to generate step to respond to caller when all the actions are done. The step should instruct the LLM to generat the tool calling. Use the same communication channel tp respond back. Call the tool 'agent_sendMessage' the same. 
+11. Responding to the channel will be an 'LLM' step type. It will be an LLM step type with 'agent_sendMessage'. This is because the current agent who recived the message, will be sending the message using the same channel.
+12. If ther is a communication channel for response, same can be used for to send error message back to the caller.
+13. Consecutive steps for the same LLM MUST be merged into a single step string (e.g., 'Do X and then Y'); never output back-to-back step objects for the same agent.
+14. Human in the loop can be part of a step. So, no need a generate a dedicated step. For example, if the step is to delete a file, which needs human approval, the step to delete the file itself can have the flag hitlNeeded
+15. For Human in the loop step, include all the tools, and prompt needed to process the step. Also include the endFlow step, to be called if there is any invalid response from the human.
 
 
 ## Multi-Agent Orchestration & Data Handoffs
@@ -162,6 +161,9 @@ Before generating any steps, you must evaluate the task requirements internally 
 - Response of the last step will be given to user. So, if the domain steps does not specify a format, provide a human readable response.
 - You may be calling a tool or next step. You can use agent_runStep tool or use the 'nextStep', attribute in response JSON to tell the system to run a specific step,
 
+## Context Management Notice:
+The orchestration layer may automatically truncate large payloads or tool call inputs in previous message history using annotations like [SYSTEM NOTE: ...] or ...<trimmed>, or trim the array to a smaller manageable size. Only the input will be trimmed. tool call result will not be trimmed.
+CRITICAL: These truncation markers are injected by the system after execution. Never output, mimic, or copy truncation markers inside your tool call arguments or code outputs. Always generate complete, fully valid content.
 
 ## Behavior
 - Be deterministic and structured.

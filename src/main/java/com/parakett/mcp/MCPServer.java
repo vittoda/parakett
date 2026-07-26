@@ -1,6 +1,8 @@
 package com.parakett.mcp;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -10,7 +12,16 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.parakett.JsonUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MCPServer {
+
+    private static final String[] VALID_INPUT_TYPES = { "string", "number", "integer", "boolean", "object", "array",
+            "null" };
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MCPServer.class);
+
     public String name;
     public String version;
     public String category;
@@ -67,7 +78,7 @@ public class MCPServer {
         JsonNode result = conn.sendRequest(request);
         result = result.get("result");
 
-        JsonNode serverInfo =result.get("serverInfo");
+        JsonNode serverInfo = result.get("serverInfo");
         this.name = serverInfo.get("name").asText();
         this.version = serverInfo.get("version").asText();
 
@@ -104,17 +115,83 @@ public class MCPServer {
             _mCommand = json.get("command").asText();
         }
 
-        
     }
 
     private void _processToolsDef(ArrayNode tools) throws MCPException {
         int len = tools.size();
         for (int i = 0; i < len; i++) {
-            JsonNode t =  tools.get(i);
-            String name = t.get("name").asText();
+            JsonNode t = tools.get(i);
+            String toolName = t.get("name").asText();
             String description = t.get("description").asText();
             JsonNode inputSchema = t.get("inputSchema");
-            _mTools.put(name, new MCPTool(name, description, inputSchema));
+            ArrayList<String> errors = new ArrayList<>();
+            validateInputSchema(inputSchema, "", false, errors);
+
+            if (errors.size() > 0) {
+                StringBuilder b = new StringBuilder("Input schema validation error for tool '" + toolName
+                        + "' in MCP server " + this.name + "'. Validation errors \n");
+                for (String s : errors) {
+                    b.append(s).append("\n");
+                }
+                LOGGER.warn("Invalid tool definition '{}'", inputSchema.toPrettyString());
+                throw new InvalidToolDefinitionException(b.toString());
+            }
+            _mTools.put(toolName, new MCPTool(toolName, description, inputSchema));
+        }
+    }
+
+    private void validateInputSchema(JsonNode inputSchema, String name, boolean descriptionRequired,
+            ArrayList<String> errors) {
+        if (!inputSchema.has("type") || !inputSchema.get("type").isTextual()) {
+            errors.add("Invalid schema for property '" + name + "'. 'type' attribute not specified");
+            return;
+        }
+
+        String type = inputSchema.get("type").asText();
+        boolean found = false;
+        for (String t : VALID_INPUT_TYPES) {
+            if (type.equals(t)) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            errors.add("Invalid type for property '" + name + "'. Type '" + type + "' is not allowed");
+            return;
+        }
+
+        if (descriptionRequired) {
+            if (!inputSchema.has("description") || !inputSchema.get("description").isTextual()) {
+                errors.add("Invalid schema for property '" + name + "'. 'description' attribute not specified");
+                return;
+            }
+        }
+
+        if (type.equals("object")) {
+            if (!inputSchema.has("properties") || !inputSchema.get("properties").isObject()) {
+                errors.add("'properties' attribute is required for property '" + name
+                        + "', with details for all the attributes");
+                return;
+            }
+
+            JsonNode properties = inputSchema.get("properties");
+            Iterator<String> fieldNames = properties.fieldNames();
+            while (fieldNames.hasNext()) {
+                String key = fieldNames.next();
+                JsonNode value = properties.get(key);
+                validateInputSchema(value, name + "." + key, true, errors);
+            }
+
+        } else if (type.equals("array")) {
+            if (!inputSchema.has("items") || !inputSchema.get("items").isObject()) {
+                errors.add("'properties' attribute is required for property '" + name
+                        + "', with details for all the attributes");
+                return;
+            }
+
+            validateInputSchema(inputSchema.get("items"), name + "[items]", false, errors);
+
         }
     }
 

@@ -93,6 +93,7 @@ public class ModelResponseHandler {
             ArrayNode toolNames = JsonUtils.MAPPER.createArrayNode();
             for (ToolCall tc : toolResponse.toolCalls) {
                 toolNames.add(tc.toolName);
+                LOGGER.info("Calling tool '{}'", tc.toolName);
                 if (tc.toolName.equals("agent_runStep")) {
                     String stepName = tc.arguments.get("stepName").asText();
                     flowRunner.runStep(stepName, null);
@@ -137,11 +138,12 @@ public class ModelResponseHandler {
                     long startTime = System.currentTimeMillis();
                     ToolCallResponse toolResult = runner.run(flowRunner.getAgentInstance());
                     long endTime = System.currentTimeMillis();
-                    LOGGER.info("Tool call completed for tool '{}'.", tc.toolName);
+                    
                     stepRunInstance.addLogInfo("toolRunDuration", (endTime - startTime));
                     flowRunner.addToolResult(tc.toolName, tc.toolId, toolResult.getResultJSON());
                     // Take the next step from current tool run step, and proceed.
                 }
+                LOGGER.info("Tool call completed for tool '{}'.", tc.toolName);
             }
 
             stepRunInstance.addLogInfo("selectedTools", toolNames);

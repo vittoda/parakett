@@ -25,7 +25,8 @@ public class MCPTool {
         ObjectNode def = JsonUtils.MAPPER.createObjectNode();
         def.put("name", name);
         def.put("description", description);
-        def.set("parameters", inputSchema);
+        ObjectNode is = (ObjectNode)inputSchema;
+        def.set("parameters", is);
         return def;
 
     }

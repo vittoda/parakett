@@ -1,0 +1,21 @@
+{
+    "mcpServers": [
+       {
+            "name": "shell",
+            "category" : "System",
+            "command" : "/usr/bin/java -jar ${mcp.base}/shell/build/libs/shell-1.0.1-all.jar ",
+            "connection": {
+                "type": "stdio"
+            }
+        },
+        {
+            "name": "codeRun",
+            "category" : "System",
+            "command" : "/usr/bin/java -jar ${mcp.base}/codeRun/build/libs/codeRun-1.0.1-all.jar ",
+            "connection": {
+                "type": "stdio"
+            }
+        }
+    ]
+    
+}

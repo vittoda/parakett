@@ -1,0 +1,14 @@
+{
+    "agents": [
+        {
+            "name": "Coding",
+            "model" : "openai/gpt-4o",
+            "id": "coding",
+            "description": "A basic java coding agent",
+            "context": {
+                "file": "./examples/coding/codingcontext.txt"
+            },
+            "mcpServers" : ["shell", "codeRun"]
+        }
+    ]
+}
